@@ -30,7 +30,7 @@ Use o painel para monitorar e otimizar seu PC.
    👉 https://usuario2207ed-hue.github.io/Dashboard-PC-Monitor/
 
 2. Download dos arquivos:  
-   👉 https://usuario2207ed-hue.github.io/Dashboard-PC-Monitor/
+   👉 https://github.com/usuario2207ed-hue/Dashboard-PC-Monitor/archive/refs/heads/main.zip
 
 ---
 
