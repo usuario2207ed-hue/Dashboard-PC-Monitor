@@ -1,0 +1,27 @@
+Como funciona o server.exe
+
+O server.exe é o coração do painel de monitoramento do PC. Ele é um pequeno servidor que coleta informações do seu computador e fornece essas informações para o painel web (interface HTML).
+
+Principais funções
+
+Monitora o uso de CPU, RAM e Disco em tempo real.
+
+Mantém um histórico dos últimos 30 valores de cada recurso, usado para gerar gráficos.
+
+Oferece otimizações seguras:
+
+CPU: simulação de otimização segura.
+
+RAM: libera memória cache de forma segura.
+
+Disco: limpa arquivos temporários do sistema.
+
+Como funciona na prática
+
+Quando você executa o server.exe, ele inicia o servidor local na porta 5000.
+
+O painel web (index.html) se conecta a ele automaticamente e mostra gráficos e porcentagens atualizadas em tempo real.
+
+Ao clicar nos botões de otimização no painel, o servidor executa ações seguras para melhorar o desempenho do PC.
+
+Quando não for usar, é importante parar o servidor para liberar recursos.

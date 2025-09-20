@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📈 Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+}
+h1 { margin-top: 20px; text-align: center; }
+.dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 30px;
+}
+.gauge-container {
+    position: relative;
+    width: 260px;
+    height: 180px;
+    text-align: center;
+}
+svg { width: 100%; height: auto; }
+.label {
+    text-align: center;
+    font-weight: bold;
+    margin-top: -10px;
+    font-size: 18px;
+}
+.label.alert { color: #d9534f; }
+button {
+    margin-top: 5px;
+    padding: 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    background: #2e8b57;
+    color: #fff;
+}
+button:hover { background: #1e6845; }
+#windowsVersion {
+    margin-top: 30px;
+    font-size: 20px;
+    color: #0f0;
+    text-align: center;
+}
+.chart-container {
+    width: 90%;
+    max-width: 800px;
+    margin-top: 40px;
+}
+/* Rodapé com letreiro digital */
+footer {
+    position: fixed;
+    bottom: -1px; /* negativo empurra mais para baixo */
+    width: 100%;
+    background: transparent;
+    color: #0f0;
+    font-family: monospace;
+    padding: 8px 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+footer span {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 2px solid #0f0;
+    width: 0;
+    animation: typing 4s steps(28, end) forwards, blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 28ch; } /* total de caracteres do texto */
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+</style>
+</head>
+<body>
+
+<h1 id="mainTitle">💻 Dashboard PC Monitor Avançado</h1>
+
+<div class="dashboard">
+    <div class="gauge-container">
+        <svg id="cpuGauge"></svg>
+        <div class="label" id="cpuPercent">CPU: 0%</div>
+        <button onclick="optimize('cpu')">Otimizar CPU</button>
+    </div>
+    <div class="gauge-container">
+        <svg id="ramGauge"></svg>
+        <div class="label" id="ramPercent">RAM: 0%</div>
+        <button onclick="optimize('ram')">Otimizar RAM</button>
+    </div>
+    <div class="gauge-container">
+        <svg id="diskGauge"></svg>
+        <div class="label" id="diskPercent">DISCO: 0%</div>
+        <button onclick="optimize('disk')">Otimizar Disco</button>
+    </div>
+</div>
+
+<div id="windowsVersion">💻Sistema Operacional: ...</div>
+
+<div class="chart-container">
+    <canvas id="historyChart"></canvas>
+</div>
+
+<footer><span id="digitalFooter">Desenvolvido por EDCELL-TECH</span></footer>
+
+<script>
+const gauges = {
+    cpu: {svg: document.getElementById('cpuGauge'), label: document.getElementById('cpuPercent')},
+    ram: {svg: document.getElementById('ramGauge'), label: document.getElementById('ramPercent')},
+    disk: {svg: document.getElementById('diskGauge'), label: document.getElementById('diskPercent')}
+};
+
+const cx = 130, cy = 130, r = 100, strokeWidth = 18;
+
+function polarToCartesian(cx, cy, r, deg){
+    const rad = (deg - 180) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function drawGauge(svg, percent){
+    svg.innerHTML = '';
+    const startBase = polarToCartesian(cx, cy, r, 0);
+    const endBase = polarToCartesian(cx, cy, r, 180);
+    const pathBase = document.createElementNS("http://www.w3.org/2000/svg","path");
+    pathBase.setAttribute('d', `M ${startBase.x} ${startBase.y} A ${r} ${r} 0 0 1 ${endBase.x} ${endBase.y}`);
+    pathBase.setAttribute('fill','none');
+    pathBase.setAttribute('stroke','#555');
+    pathBase.setAttribute('stroke-width', strokeWidth);
+    svg.appendChild(pathBase);
+
+    const endAngle = (percent/100) * 180;
+    const startColor = polarToCartesian(cx, cy, r, 0);
+    const endColor = polarToCartesian(cx, cy, r, endAngle);
+    const pathColor = document.createElementNS("http://www.w3.org/2000/svg","path");
+    pathColor.setAttribute('d', `M ${startColor.x} ${startColor.y} A ${r} ${r} 0 ${endAngle>180?1:0} 1 ${endColor.x} ${endColor.y}`);
+    let color = '#2e8b57';
+    if(percent > 80) color = '#d9534f';
+    else if(percent > 50) color = '#f0ad4e';
+    pathColor.setAttribute('stroke', color);
+    pathColor.setAttribute('fill','none');
+    pathColor.setAttribute('stroke-width', strokeWidth);
+    pathColor.setAttribute('stroke-linecap','round');
+    svg.appendChild(pathColor);
+
+    const needleLength = r - 25;
+    const needleEnd = polarToCartesian(cx, cy, needleLength, endAngle);
+    const needle = document.createElementNS("http://www.w3.org/2000/svg","line");
+    needle.setAttribute('x1', cx);
+    needle.setAttribute('y1', cy);
+    needle.setAttribute('x2', needleEnd.x);
+    needle.setAttribute('y2', needleEnd.y);
+    needle.setAttribute('stroke','#fff');
+    needle.setAttribute('stroke-width','3');
+    needle.setAttribute('stroke-linecap','round');
+    svg.appendChild(needle);
+
+    const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', 5);
+    circle.setAttribute('fill', '#fff');
+    svg.appendChild(circle);
+}
+
+// Chart.js
+const ctx = document.getElementById('historyChart').getContext('2d');
+const historyChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {label: 'CPU (%)', data: [], borderColor:'#2e8b57', fill:false, tension:0.3},
+            {label: 'RAM (%)', data: [], borderColor:'#f0ad4e', fill:false, tension:0.3},
+            {label: 'DISCO (%)', data: [], borderColor:'#d9534f', fill:false, tension:0.3}
+        ]
+    },
+    options: {
+        responsive:true,
+        plugins:{legend:{labels:{color:'#fff'}}},
+        scales:{
+            y:{min:0,max:100,ticks:{color:'#fff'}},
+            x:{ticks:{color:'#fff'}}
+        }
+    }
+});
+
+async function updateData(){
+    try{
+        const res = await fetch('http://127.0.0.1:5000/status');
+        const data = await res.json();
+
+        drawGauge(gauges.cpu.svg, data.cpu);
+        gauges.cpu.label.innerText = `CPU: ${data.cpu}%`;
+        gauges.cpu.label.className = data.cpu>80 ? 'label alert' : 'label';
+
+        drawGauge(gauges.ram.svg, data.ram);
+        gauges.ram.label.innerText = `RAM: ${data.ram}%`;
+        gauges.ram.label.className = data.ram>80 ? 'label alert' : 'label';
+
+        drawGauge(gauges.disk.svg, data.disk);
+        gauges.disk.label.innerText = `DISCO: ${data.disk}%`;
+        gauges.disk.label.className = data.disk>90 ? 'label alert' : 'label';
+
+        document.getElementById('windowsVersion').innerText = `Windows: ${data.windows_version}`;
+
+        const len = data.history.cpu.length;
+        historyChart.data.labels = Array.from({length: len}, (_, i) => i+1);
+        historyChart.data.datasets[0].data = data.history.cpu;
+        historyChart.data.datasets[1].data = data.history.ram;
+        historyChart.data.datasets[2].data = data.history.disk;
+        historyChart.update();
+
+    }catch(e){
+        console.error('Erro ao buscar dados:', e);
+    }
+}
+
+async function optimize(type){
+    try{
+        const res = await fetch(`http://127.0.0.1:5000/optimize/${type}`);
+        const data = await res.json();
+        alert(data.message);
+    }catch(e){
+        console.error(e);
+        alert('Erro ao executar otimização');
+    }
+}
+
+setInterval(updateData, 500);
+updateData();
+
+const titleMessages = [
+    "💻 Dashboard PC Monitor Avançado",
+    "⚡ Monitorando Performance da CPU",
+    "🧠 Uso de RAM em tempo real",
+    "💾 Disco e armazenamento monitorados",
+    "📊 Gráfico histórico de performance"
+];
+let titleIndex = 0;
+setInterval(() => {
+    titleIndex = (titleIndex + 1) % titleMessages.length;
+    document.getElementById('mainTitle').innerText = titleMessages[titleIndex];
+}, 10000);
+
+// Rodapé digitando em loop infinito
+const footerText = "Desenvolvido por EDCELL-TECH";
+const footerSpan = document.getElementById("digitalFooter");
+
+function startFooterTyping(){
+    footerSpan.style.width = '0';
+    footerSpan.style.animation = `typing 4s steps(${footerText.length}, end) forwards, blink 0.75s step-end infinite`;
+}
+
+startFooterTyping();
+setInterval(() => {
+    startFooterTyping();
+}, 20000);
+</script>
+
+</body>
+</html>
