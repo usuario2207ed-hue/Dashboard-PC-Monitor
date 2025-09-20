@@ -26,6 +26,23 @@ Use o painel para monitorar e otimizar seu PC.
 
 📌Quando terminar, não esqueça de parar o servidor escolhendo a opção correspondente no menu do Start.bat.
 
+1. Acesse o app neste link:  
+   👉 https://usuario2207ed-hue.github.io/Dashboard-PC-Monitor/
+
+2. Download dos arquivos:  
+   👉 https://usuario2207ed-hue.github.io/Dashboard-PC-Monitor/
+
+---
+
+⚠️ Aviso de Segurança
+
+O Dashboard PC Monitor - EDCELL-TECH utiliza bibliotecas confiáveis de Python e JavaScript. Em alguns casos, o Windows Defender pode sinalizar o programa por ser um arquivo executável (.exe), mesmo sendo seguro. Sempre baixe e execute apenas a partir de fontes confiáveis.
+
+Bibliotecas Utilizadas:
+
+Python: Flask, Flask-CORS, psutil, platform, collections, os, shutil, tempfile
+JavaScript: Chart.js, JSZip, FileSaver.js
+
 ---
 
 Pode ser usado direto no navegador do PC somente.
